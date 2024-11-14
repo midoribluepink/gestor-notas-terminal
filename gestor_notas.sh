@@ -19,6 +19,15 @@ function ctrl_c(){
 # Ctrl+C
 trap ctrl_c INT
 
+function helpPanel(){
+  echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Uso${endColour}"
+  echo -e "\t${purpleColour}c)${endColour} ${grayColour}Crear una nueva nota${endColour}"
+  echo -e "\t${purpleColour}l)${endColour} ${grayColour}Listar las notas existentes${endColour}"
+  echo -e "\t${purpleColour}b)${endColour} ${grayColour}Buscar en las notas una coincidencia${endColour}"
+  echo -e "\t${purpleColour}d)${endColour} ${grayColour}Eliminar una nota${endColour}"
+  echo -e "\t${purpleColour}h)${endColour} ${grayColour}Mostrar el panel de ayuda${endColour}\n"
+}
+
 # Creación del menú de opciones
 declare -i parameter=0 #Parametro de opción
 
@@ -41,5 +50,5 @@ elif [ $parameter -eq 3 ]; then
 elif [ $parameter -eq 4 ]; then
   echo "Función -d"
 else
-  echo "Panel de ayuda"
+  helpPanel
 fi
