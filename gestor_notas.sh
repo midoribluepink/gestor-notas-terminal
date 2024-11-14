@@ -37,7 +37,7 @@ while getopts "c:lb:d:h" arg; do #Capturamos las opciones colocadas en el progra
     c) noteName="$OPTARG"; let parameter+=1;;
     l) let parameter+=2;;
     b) searchName="$OPTARG"; let parameter+=3;;
-    d) searchID="$OPTARG"; let parameter+=4;;
+    d) noteName="$OPTARG"; let parameter+=4;;
     h) ;;
   esac
 done
@@ -66,6 +66,26 @@ function showNotes(){
   ls $(pwd) | grep -v "gestor_notas.sh" | tr -d '.txt' | column | awk '{sub($0, "\033[1;34m&\033[0m")}1'
 }
 
+# Función para eliminar notas
+function deleteNotes(){
+  noteName="$1"
+  noteName_checker="$(ls | grep $noteName)" #Comprobamos si la nota existe
+  if [ "$noteName_checker" ]; then
+    echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Seguro que quiere eliminar la nota${endColour} ${blueColour}$noteName${endColour} ${grayColour}y/n:${endColour}" #Pedimos confirmación para eliminar la nota
+    read answer #Leemos la respuesta del usuario
+    if [ "$answer" == "y" ]; then
+      echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Se eliminará${endColour} ${blueColour}$noteName${endColour}"
+      rm "$noteName".txt #Se elimina la nota
+      sleep 1
+      echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Su nota se ha eliminado${endColour}"
+    else
+      echo -e "\n${redColour}[!] No se eliminó${endColour}"
+    fi
+  else
+    echo -e "\n${yellowColour}[+]${endColour} ${grayColour}No existe la nota${endColour} ${redColour}$noteName${endColour}"
+  fi
+}
+
 # Condicional que permite al programa saber qué parametro ha sido colocado en el programa y lanza la función correspondiente.
 if [ $parameter -eq 1 ];then
   noteCreation $noteName
@@ -74,7 +94,7 @@ elif [ $parameter -eq 2 ]; then
 elif [ $parameter -eq 3 ]; then
   echo "Función -b"
 elif [ $parameter -eq 4 ]; then
-  echo "Función -d"
+  deleteNotes $noteName
 else
   helpPanel
 fi
