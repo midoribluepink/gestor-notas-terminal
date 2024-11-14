@@ -44,7 +44,7 @@ done
 
 
 # Función de creación de la nota en el sistema
-function note_creation(){
+function noteCreation(){
   tput civis
   noteName="$1"
   noteName_checker="$(ls | grep $noteName)" #Comprobamos si existe la nota.
@@ -60,11 +60,17 @@ function note_creation(){
   tput cnorm 
 }
 
+# Función para listar las notas existentes
+function showNotes(){
+  #Lista todas las notas existentes en formato columna, elimina el texto ".txt" y las colorea.
+  ls $(pwd) | grep -v "gestor_notas.sh" | tr -d '.txt' | column | awk '{sub($0, "\033[1;34m&\033[0m")}1'
+}
+
 # Condicional que permite al programa saber qué parametro ha sido colocado en el programa y lanza la función correspondiente.
 if [ $parameter -eq 1 ];then
-  note_creation $noteName
+  noteCreation $noteName
 elif [ $parameter -eq 2 ]; then
-  echo "Función -l"
+  showNotes
 elif [ $parameter -eq 3 ]; then
   echo "Función -b"
 elif [ $parameter -eq 4 ]; then
