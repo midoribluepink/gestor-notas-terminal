@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#Colours
+# Códigos de colores para la salida de la terminal.
 greenColour="\e[0;32m\033[1m"
 endColour="\033[0m\e[0m"
 redColour="\e[0;31m\033[1m"
@@ -10,7 +10,7 @@ purpleColour="\e[0;35m\033[1m"
 turquoiseColour="\e[0;36m\033[1m"
 grayColour="\e[0;37m\033[1m"
 
-#Función para parar el programa con Ctrl+C
+# Función para parar el programa con Ctrl+C.
 function ctrl_c(){
   echo -e "\n\n${redColour}[!] Saliendo... ${endColour}\n"
   tput cnorm && exit 1
@@ -19,6 +19,7 @@ function ctrl_c(){
 # Ctrl+C
 trap ctrl_c INT
 
+# Función que despliega el panel de ayuda del programa.
 function helpPanel(){
   echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Uso${endColour}"
   echo -e "\t${purpleColour}c)${endColour} ${grayColour}Crear una nueva nota${endColour}"
@@ -28,11 +29,11 @@ function helpPanel(){
   echo -e "\t${purpleColour}h)${endColour} ${grayColour}Mostrar el panel de ayuda${endColour}\n"
 }
 
-# Creación del menú de opciones
-declare -i parameter=0 #Parametro de opción
+# Creación del menú de parámetros que se le pueden pasar al programa.
+declare -i parameter=0 #Parametro de opción que cambiará según la opción elegida.
 
-while getopts "c:lb:d:h" arg; do
-  case $arg in
+while getopts "c:lb:d:h" arg; do #Capturamos las opciones colocadas en el programa desde la terminal
+  case $arg in #Los parámetros c y h no recibe argumentos. Los parámetros c,d y b sí reciben un argumento.
     c) noteName="$OPTARG"; let parameter+=1;;
     l) let parameter+=2;;
     b) searchName="$OPTARG"; let parameter+=3;;
@@ -41,13 +42,15 @@ while getopts "c:lb:d:h" arg; do
   esac
 done
 
+
+# Función de creación de la nota en el sistema
 function note_creation(){
   tput civis
   noteName="$1"
-  noteName_checker="$(ls | grep $noteName)"
-  if [ "$noteName_checker" ]; then
+  noteName_checker="$(ls | grep $noteName)" #Comprobamos si existe la nota.
+  if [ "$noteName_checker" ]; then #Si existe avisamos al usuario.
     echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Esta nota ya existe, elige un nuevo nombre${endColour}\n"
-  else
+  else # Si no existe, creamos una nueva nota y la inicizalizamos con nvim.
     touch "$noteName".txt
     echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Se ha creado la nota${endColour} ${blueColour}$noteName.txt${endColour}\n"
     echo -e "#Nombre de la nota: $noteName\n" > "$noteName".txt
@@ -57,6 +60,7 @@ function note_creation(){
   tput cnorm 
 }
 
+# Condicional que permite al programa saber qué parametro ha sido colocado en el programa y lanza la función correspondiente.
 if [ $parameter -eq 1 ];then
   note_creation $noteName
 elif [ $parameter -eq 2 ]; then
