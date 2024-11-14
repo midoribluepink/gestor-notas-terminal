@@ -31,9 +31,9 @@ function helpPanel(){
 # Creación del menú de opciones
 declare -i parameter=0 #Parametro de opción
 
-while getopts "clb:d:h" arg; do
+while getopts "c:lb:d:h" arg; do
   case $arg in
-    c) let parameter+=1;;
+    c) noteName="$OPTARG"; let parameter+=1;;
     l) let parameter+=2;;
     b) searchName="$OPTARG"; let parameter+=3;;
     d) searchID="$OPTARG"; let parameter+=4;;
@@ -41,8 +41,24 @@ while getopts "clb:d:h" arg; do
   esac
 done
 
+function note_creation(){
+  tput civis
+  noteName="$1"
+  noteName_checker="$(ls | grep $noteName)"
+  if [ "$noteName_checker" ]; then
+    echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Esta nota ya existe, elige un nuevo nombre${endColour}\n"
+  else
+    touch "$noteName".txt
+    echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Se ha creado la nota${endColour} ${blueColour}$noteName.txt${endColour}\n"
+    echo -e "#Nombre de la nota: $noteName\n" > "$noteName".txt
+    sleep 2
+    nvim "$noteName".txt
+  fi
+  tput cnorm 
+}
+
 if [ $parameter -eq 1 ];then
-  echo "Función -c"
+  note_creation $noteName
 elif [ $parameter -eq 2 ]; then
   echo "Función -l"
 elif [ $parameter -eq 3 ]; then
