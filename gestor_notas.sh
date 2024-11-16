@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#Versión para notas en markdown: archivos.md
+
 # Códigos de colores para la salida de la terminal.
 greenColour="\e[0;32m\033[1m"
 endColour="\033[0m\e[0m"
@@ -51,11 +53,11 @@ function noteCreation(){
   if [ "$noteName_checker" ]; then #Si existe avisamos al usuario.
     echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Esta nota ya existe, elige un nuevo nombre${endColour}\n"
   else # Si no existe, creamos una nueva nota y la inicizalizamos con nvim.
-    touch "$noteName".txt
+    touch "$noteName".md
     echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Se ha creado la nota${endColour} ${blueColour}$noteName.txt${endColour}\n"
-    echo -e "#Nombre de la nota: $noteName\n" > "$noteName".txt
+    echo -e "#Nombre de la nota: $noteName\n" > "$noteName".md
     sleep 2
-    vim "$noteName".txt
+    vim "$noteName".md
   fi
   tput cnorm 
 }
@@ -63,7 +65,7 @@ function noteCreation(){
 # Función para listar las notas existentes
 function showNotes(){
   #Lista todas las notas existentes en formato columna, elimina el texto ".txt" y las colorea.
-  ls | grep -v "gestor_notas.sh" | sed 's/.txt//' | awk '{sub($0, "\033[1;34m&\033[0m")}1' | sort | column
+  ls | grep -v "gestor_notas.sh" | sed 's/.md//' | awk '{sub($0, "\033[1;34m&\033[0m")}1' | sort | column
 }
 
 # Función para eliminar notas
@@ -75,7 +77,7 @@ function deleteNotes(){
     read answer #Leemos la respuesta del usuario
     if [ "$answer" == "y" ]; then
       echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Se eliminará${endColour} ${blueColour}$noteName${endColour}"
-      rm "$noteName".txt #Se elimina la nota
+      rm "$noteName".md #Se elimina la nota
       sleep 1
       echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Su nota se ha eliminado${endColour}"
     else
@@ -95,18 +97,18 @@ function noteSearch(){
 
   if [ "$file_checker" ]; then #Si hay notas con el parámetro indicado dentro del título se muestran
     echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Las siguientes notas tienen el parámetro de búsqueda en su título:${endColour}\n"
-    ls | grep -i "$searchName" | grep -v "gestor_notas" | sed 's/.txt//' | sort |column | awk '{sub($0, "\033[1;35m&\033[0m")}1'
+    ls | grep -i "$searchName" | grep -v "gestor_notas" | sed 's/.md//' | sort |column | awk '{sub($0, "\033[1;35m&\033[0m")}1'
   else
     echo -e "\n${yellowColour}[+]${endColour} ${redColour}No hay ninguna nota con ese parámetro en su título${endColour}"
   fi
 
-  for archivo in "$(pwd)"/*txt; do #Buscamos en todos los archivos txt del directorio actual
+  for archivo in "$(pwd)"/*md; do #Buscamos en todos los archivos txt del directorio actual
     directory_checker=$(file "$archivo" | grep "directory") #Comprobamos que no sea un directorio, si lo es pasamos al siguiente
     if [ "$directory_checker" ]; then
       continue
     fi
 
-    archiveName="$(echo basename "$archivo" | grep -o '[^/]*$' | sed 's/.txt//')" #Extraemos el nombre del archivo
+    archiveName="$(echo basename "$archivo" | grep -o '[^/]*$' | sed 's/.md//')" #Extraemos el nombre del archivo
     content_checker="$(cat "$archivo" | grep -i -F "$searchName")" #Comprobamos si hay coincidencias dentro del archivo
     if [ "$content_checker" ]; then #Si hay coincidencias se muestran
       echo -e "\n${yellowColour}[+]${endColour} ${grayColour}La nota${endColour} ${greenColour}"$archiveName"${endColour} ${grayColour}tiene la siguientes coincidencias:${endColour}"
