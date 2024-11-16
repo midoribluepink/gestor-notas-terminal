@@ -47,7 +47,7 @@ done
 function noteCreation(){
   tput civis
   noteName="$1"
-  noteName_checker="$(ls | grep $noteName)" #Comprobamos si existe la nota.
+  noteName_checker="$(ls | grep -i "$noteName")" #Comprobamos si existe la nota.
   if [ "$noteName_checker" ]; then #Si existe avisamos al usuario.
     echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Esta nota ya existe, elige un nuevo nombre${endColour}\n"
   else # Si no existe, creamos una nueva nota y la inicizalizamos con nvim.
@@ -55,7 +55,7 @@ function noteCreation(){
     echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Se ha creado la nota${endColour} ${blueColour}$noteName.txt${endColour}\n"
     echo -e "#Nombre de la nota: $noteName\n" > "$noteName".txt
     sleep 2
-    nvim "$noteName".txt
+    vim "$noteName".txt
   fi
   tput cnorm 
 }
@@ -63,13 +63,13 @@ function noteCreation(){
 # Función para listar las notas existentes
 function showNotes(){
   #Lista todas las notas existentes en formato columna, elimina el texto ".txt" y las colorea.
-  ls $(pwd) | grep -v "gestor_notas.sh" | tr -d '.txt' | column | awk '{sub($0, "\033[1;34m&\033[0m")}1'
+  ls | grep -v "gestor_notas.sh" | sed 's/.txt//' | awk '{sub($0, "\033[1;34m&\033[0m")}1' | sort | column
 }
 
 # Función para eliminar notas
 function deleteNotes(){
   noteName="$1"
-  noteName_checker="$(ls | grep $noteName)" #Comprobamos si la nota existe
+  noteName_checker="$(ls | grep "$noteName")" #Comprobamos si la nota existe
   if [ "$noteName_checker" ]; then
     echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Seguro que quiere eliminar la nota${endColour} ${blueColour}$noteName${endColour} ${grayColour}y/n:${endColour}" #Pedimos confirmación para eliminar la nota
     read answer #Leemos la respuesta del usuario
@@ -86,15 +86,48 @@ function deleteNotes(){
   fi
 }
 
+# Función para búsqueda entre notas
+function noteSearch(){
+  searchName="$1"
+
+  file_checker="$(ls | grep -i "$searchName" | grep -v "gestor_notas")" #Comprobamos si hay notas con el nombre indicado
+  declare -i archive_parameter=0 #Parámetro que nos dice si hay coincidencias en algún archivo
+
+  if [ "$file_checker" ]; then #Si hay notas con el parámetro indicado dentro del título se muestran
+    echo -e "\n${yellowColour}[+]${endColour} ${grayColour}Las siguientes notas tienen el parámetro de búsqueda en su título:${endColour}\n"
+    ls | grep -i "$searchName" | grep -v "gestor_notas" | sed 's/.txt//' | sort |column | awk '{sub($0, "\033[1;35m&\033[0m")}1'
+  else
+    echo -e "\n${yellowColour}[+]${endColour} ${redColour}No hay ninguna nota con ese parámetro en su título${endColour}"
+  fi
+
+  for archivo in "$(pwd)"/*txt; do #Buscamos en todos los archivos txt del directorio actual
+    directory_checker=$(file "$archivo" | grep "directory") #Comprobamos que no sea un directorio, si lo es pasamos al siguiente
+    if [ "$directory_checker" ]; then
+      continue
+    fi
+
+    archiveName="$(echo basename "$archivo" | grep -o '[^/]*$' | sed 's/.txt//')" #Extraemos el nombre del archivo
+    content_checker="$(cat "$archivo" | grep -i -F "$searchName")" #Comprobamos si hay coincidencias dentro del archivo
+    if [ "$content_checker" ]; then #Si hay coincidencias se muestran
+      echo -e "\n${yellowColour}[+]${endColour} ${grayColour}La nota${endColour} ${greenColour}"$archiveName"${endColour} ${grayColour}tiene la siguientes coincidencias:${endColour}"
+      cat "$archivo" | grep --color=always -i -F "$searchName"
+      let archive_parameter+=1
+    fi
+  done
+  if [ $archive_parameter -eq 0 ]; then
+    echo -e "\n${yellowColour}[+]${endColour} ${redColour}No se han encontrado coincidencias en ningún archivo :(${endColour}"
+  fi
+}
+
 # Condicional que permite al programa saber qué parametro ha sido colocado en el programa y lanza la función correspondiente.
 if [ $parameter -eq 1 ];then
-  noteCreation $noteName
+  noteCreation "$noteName"
 elif [ $parameter -eq 2 ]; then
   showNotes
 elif [ $parameter -eq 3 ]; then
-  echo "Función -b"
+  noteSearch "$searchName"
 elif [ $parameter -eq 4 ]; then
-  deleteNotes $noteName
+  deleteNotes "$noteName"
 else
   helpPanel
 fi
